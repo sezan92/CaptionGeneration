@@ -2,13 +2,13 @@
 import keras
 import pickle
 from keras.applications.vgg16 import VGG16
-#from keras.applications import Xception,InceptionV3,InceptionResNetV2
+from keras.applications import Xception,InceptionV3,InceptionResNetV2
 from keras.preprocessing.image import load_img
 from keras.preprocessing.image import img_to_array
 from keras.applications.vgg16 import preprocess_input
 from keras.utils import np_utils
 from keras.preprocessing.sequence import pad_sequences
-#from keras.utils import plot_model
+from keras.utils import plot_model
 from keras.models import Model
 from keras.layers import Input
 from keras.layers import Dense
@@ -16,7 +16,6 @@ from keras.layers import LSTM
 from keras.layers import Embedding
 from keras.layers import Dropout
 from keras.layers.merge import add
-from keras.callbacks import ModelCheckpoint
 import numpy as np
 import pickle
 import os
@@ -28,7 +27,7 @@ def prev_model():
     model.summary()
     return model
 
-directory = 'Flicker8k_Dataset'
+directory = 'dataset/Flicker8k_Dataset'
 
 def extract_features(directory,model_name):
     if os.path.exists('dataset/features_%s.pkl'%(model_name)):
@@ -104,7 +103,7 @@ test=load_dataset(test_filename)
 
 def get_features(dataset):
     features_dict= dict()
-    features = pickle.load(open('dataset/features_VGG16.pkl'))
+    features = pickle.load(open('features_VGG16.pkl'))
     for image_name in dataset:
         features_dict[image_name]= features[image_name]
     return features_dict
@@ -143,7 +142,9 @@ print('Vocabulary Size %d'%vocab_size)
 
 i2w = dict((i,c)for i,c in enumerate(vocab))
 w2i = dict((c,i)for i,c in enumerate(vocab))
-
+# In[save vocab]
+pickle.dump(vocab,open('vocabulary.pkl','w'))
+# In[diff]
 w2i['raining']
 
 max_length =max(max([[len(d.split()) for d in ls] for ls in train_desc.values()]))
@@ -229,7 +230,7 @@ test_x1 = prepare_features(test_features_set,test_desc_encoded)
 
 
 np.array(train_x1[1:10]).shape
-print("Defining Model!")
+
 if True:
     
     in1  = Input(shape=(4096,))
@@ -245,26 +246,22 @@ if True:
     full_model = Model(inputs=[in1,in2],outputs=output)
     full_model.summary()
     full_model.compile(loss='sparse_categorical_crossentropy',optimizer='adam')
-print("Defined!")
+
 plot_model(full_model, to_file='model_new.png', show_shapes=True)
 
 len(train_x1)
 batch_size=1024
 #dev_x1 = dev_x1[:-batch_size]
 epochs = 20
-filepath = 'output/model-ep{epoch:03d}-loss{loss:.3f}-val_loss{val_loss:.3f}.h5'
-print("Starting to train....")
-#checkpoint = ModelCheckpoint(filepath, monitor='val_loss', verbose=1, save_best_only=True, mode='min')
-# fit model
 for epoch in range(epochs):
     for i in range(0,len(train_x1),batch_size):
         X1train = np.array(train_x1[i:i+batch_size])
         X2train = train_desc_encoded_np[i:i+batch_size]
         ytrain = train_out_np[i:i+batch_size]
-        X1test = np.array(dev_x1[i:i+batch_size])
-        X2test = dev_desc_encoded_np[i:i+batch_size]
+        X1test = np.array(dev_x1)
+        X2test = dev_desc_encoded_np
         ytest = dev_out_np
-        full_model.fit([X1train, X2train], ytrain, verbose=1,batch_size=batch_size,validation_data=([X1test, X2test], ytest))
+        full_model.fit([X1train, X2train], ytrain, verbose=0,batch_size=batch_size,validation_data=([X1test, X2test], ytest))
     train_loss =full_model.evaluate(x=[X1train, X2train], y=ytrain,verbose=0)
     Val_loss = full_model.evaluate(x=[X1test, X2test], y=ytest,verbose=0)
     print("Epoch %d , Train Loss %f and Val Loss %f"%(epoch,train_loss,Val_loss))
@@ -273,8 +270,8 @@ for epoch in range(epochs):
 full_model.evaluate(x=[X1test,X2test],y=ytest)
 
 model_json = full_model.to_json()
-with open("output/Caption_model_VGG16.json", "w") as json_file:
+with open("/output/Caption_model_VGG16.json", "w") as json_file:
     json_file.write(model_json)
 # serialize weights to HDF5
-full_model.save_weights("output/Caption_model_VGG16.h5")
+full_model.save_weights("/output/Caption_model_VGG16.h5")
 print("Saved model to disk")

@@ -122,7 +122,7 @@ def get_img_feature(filename,model=model):
 
 
 # In[41]:
-test_dir ='Test Images'
+test_dir ='Propic'
 image_names =os.listdir(test_dir)
 
 for image_name in image_names:
