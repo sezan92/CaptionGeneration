@@ -2,7 +2,7 @@
 MD Muhaimin Rahman
 contact: sezan92[at]gmail[dot]com
 
-In this project, I have tried to work on Caption generation of Images of Flickr_8k dataset. I took extensive help from Jason Brownlee's Blog [article](https://machinelearningmastery.com/develop-a-deep-learning-caption-generation-model-in-python/) on the same dataset. But I thought some codeblocks were unnecessarily complex . So I changed them for my project. The main architecture which is mainly taken from Googles [paper](https://arxiv.org/abs/1411.4555),
+In this project, I have tried to work on Caption generation of Images of Flickr_8k dataset. I took extensive help from Jason Brownlee's Blog [article](https://machinelearningmastery.com/develop-a-deep-learning-caption-generation-model-in-python/) on the same dataset. But I thought some codeblocks were unnecessarily complex . So I changed them for my project. The main architecture is mainly taken from Googles [paper](https://arxiv.org/abs/1411.4555),
 
 Some Examples:
 ![Caption1](Caption0.jpg)
